@@ -17,6 +17,14 @@ class Task {
         });
     }
 
+    static findByStatusAndUserId(status, user_id, callback) {
+        const sql = "SELECT * FROM tasks WHERE status = $1 AND user_id = $2";
+        pool.query(sql, [status, user_id], (err, res) => {
+            if (err) return callback(err);
+            callback(null, res.rows);
+        });
+    }
+
     static update(id, data, callback) {
         const sql = "UPDATE tasks SET title = $1, description = $2, status = $3 WHERE id = $4 RETURNING *";
         pool.query(sql, [data.title, data.description, data.status, id], (err, res) => {

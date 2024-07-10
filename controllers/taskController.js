@@ -12,12 +12,23 @@ exports.createTask = (req, res) => {
 
 exports.getTasks = (req, res) => {
     const user_id = req.user.id;
+    const { status } = req.query; // Pobranie statusu z zapytania
 
-    Task.findByUserId(user_id, (err, tasks) => {
-        if (err) return res.status(500).send(err);
-        res.send(tasks);
-    });
+    if (!status) {
+        // Jeśli status nie jest podany, zwracamy wszystkie zadania użytkownika
+        Task.findByUserId(user_id, (err, tasks) => {
+            if (err) return res.status(500).send(err);
+            res.send(tasks);
+        });
+    } else {
+        // Jeśli status jest podany, zwracamy zadania tylko z tym statusem
+        Task.findByStatusAndUserId(status, user_id, (err, tasks) => {
+            if (err) return res.status(500).send(err);
+            res.send(tasks);
+        });
+    }
 };
+
 
 exports.updateTask = (req, res) => {
     const taskId = req.params.id;
