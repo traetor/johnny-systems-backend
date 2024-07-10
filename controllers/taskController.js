@@ -4,8 +4,15 @@ exports.createTask = (req, res) => {
     const { title, description } = req.body;
     const user_id = req.user.id;
 
-    Task.create({ user_id: user_id, title, description, status: 'to_do' }, (err, result) => {
-        if (err) return res.status(500).send(err);
+    if (!title) {
+        return res.status(400).send({ message: 'Title is required' });
+    }
+
+    Task.create({ user_id, title, description, status: 'to_do' }, (err, result) => {
+        if (err) {
+            console.error('Error creating task:', err);
+            return res.status(500).send(err);
+        }
         res.status(201).send({ message: 'Task created successfully' });
     });
 };
@@ -34,7 +41,15 @@ exports.updateTask = (req, res) => {
     const taskId = req.params.id;
     const { title, description, status } = req.body;
 
-    Task.update(taskId, { title, description, status }, (err, result) => {
+    // Utwórz pusty obiekt na dane, które będą aktualizowane
+    const updatedFields = {};
+
+    // Dodaj tylko te pola do obiektu, które zostały przesłane w zapytaniu
+    if (title) updatedFields.title = title;
+    if (description) updatedFields.description = description;
+    if (status) updatedFields.status = status;
+
+    Task.update(taskId, updatedFields, (err, result) => {
         if (err) return res.status(500).send(err);
         res.send({ message: 'Task updated successfully' });
     });

@@ -26,12 +26,21 @@ class Task {
     }
 
     static update(id, data, callback) {
-        const sql = "UPDATE tasks SET title = $1, description = $2, status = $3 WHERE id = $4 RETURNING *";
-        pool.query(sql, [data.title, data.description, data.status, id], (err, res) => {
+        // Buduj zapytanie SQL dynamicznie na podstawie obiektu data
+        const keys = Object.keys(data);
+        const values = keys.map((key, index) => `$${index + 1}`);
+
+        const sql = `UPDATE tasks SET ${keys.map((key, index) => `${key} = ${values[index]}`).join(', ')} WHERE id = $${keys.length + 1} RETURNING *`;
+
+        // Połącz tablicę wartości i dodaj id na końcu
+        const params = [...Object.values(data), id];
+
+        pool.query(sql, params, (err, res) => {
             if (err) return callback(err);
             callback(null, res.rows[0]);
         });
     }
+
 
     static delete(id, callback) {
         const sql = "DELETE FROM tasks WHERE id = $1";
