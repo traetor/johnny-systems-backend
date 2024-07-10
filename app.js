@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const path = require('path'); // Dodaj import path
 
 const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
@@ -48,7 +49,7 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use('/api-docs', swaggerUi.serveFiles(swaggerDocs), swaggerUi.setup(swaggerDocs, { explorer: true }));
 
 app.get('/', (req, res) => {
     res.send('Welcome to the Task Manager App');
