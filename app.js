@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
-const cors = require('cors'); // Dodaj import cors
+const cors = require('cors');
 
 const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
@@ -14,17 +14,14 @@ const app = express();
 app.use(bodyParser.json());
 app.use('/uploads/avatars', express.static('uploads/avatars'));
 
-// Ustawienie opcji dla CORS
 const corsOptions = {
     origin: '*', // Możesz dostosować do konkretnego origin
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
 };
 
-// Dodaj middleware CORS przed zdefiniowanymi trasami API
 app.use(cors(corsOptions));
 
-// Dodaj trasę dla głównej ścieżki
 app.get('/', (req, res) => {
     res.send('Welcome to the Task Manager App');
 });

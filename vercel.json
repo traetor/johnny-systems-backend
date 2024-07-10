@@ -1,10 +1,13 @@
 {
   "version": 2,
   "builds": [
-    { "src": "app.js", "use": "@vercel/node" }
+    { "src": "backend/app.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "app.js" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ]
+    { "src": "/api/(.*)", "dest": "backend/app.js" },
+    { "src": "/(.*)", "dest": "backend/app.js" }
+  ],
+  "env": {
+    "PORT": "3001"  // Ustawienie zmiennej środowiskowej PORT
+  }
 }
