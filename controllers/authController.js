@@ -7,6 +7,12 @@ dotenv.config();
 
 exports.register = (req, res) => {
     const { username, email, password } = req.body;
+
+    // Check if the email and password have been sent
+    if (!email || !password) {
+        return res.status(400).send({ message: 'Email and password are required' });
+    }
+
     bcrypt.hash(password, 10, (err, hash) => {
         if (err) throw err;
         User.create({ username, email, password: hash, avatar: null }, (err, result) => {
@@ -18,6 +24,12 @@ exports.register = (req, res) => {
 
 exports.login = (req, res) => {
     const { email, password } = req.body;
+
+    // Check if the email and password have been sent
+    if (!email || !password) {
+        return res.status(400).send({ message: 'Email and password are required' });
+    }
+
     User.findByEmail(email, (err, users) => {
         if (err) return res.status(500).send(err);
         if (users.length === 0) return res.status(404).send({ message: 'User not found' });
