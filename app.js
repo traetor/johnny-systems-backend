@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use('/uploads/avatars', express.static('uploads/avatars'));
 
 const corsOptions = {
-    origin: '*', // Możesz dostosować do konkretnego origin
+    origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
 };
