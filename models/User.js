@@ -32,6 +32,14 @@ class User {
             callback(null, res.rows[0]);
         });
     }
+
+    static activate(token, callback) {
+        const sql = "UPDATE users SET is_active = TRUE, activation_token = NULL WHERE activation_token = $1 RETURNING *";
+        pool.query(sql, [token], (err, res) => {
+            if (err) return callback(err);
+            callback(null, res.rows[0]);
+        });
+    }
 }
 
 module.exports = User;
