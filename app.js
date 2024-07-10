@@ -16,14 +16,18 @@ const app = express();
 app.use(bodyParser.json());
 app.use('/uploads/avatars', express.static('uploads/avatars'));
 
-// Ustawienie opcji dla CORS
 const corsOptions = {
-    origin: '*', // Możesz dostosować do konkretnego origin
+    origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
 };
 
 app.use(cors(corsOptions));
+
+// Dynamic URL based on environment
+const serverUrl = process.env.NODE_ENV === 'production'
+    ? 'https://johnny-systems-backend.vercel.app'
+    : `http://localhost:${process.env.PORT || 3001}`;
 
 // Konfiguracja Swaggera
 const swaggerOptions = {
@@ -36,17 +40,16 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: `http://localhost:${process.env.PORT || 3001}`,
+                url: serverUrl,
             },
         ],
     },
-    apis: ['./routes/*.js'], // Ścieżka do plików z definicjami endpointów
+    apis: ['./routes/*.js'],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Dodaj trasę dla głównej ścieżki
 app.get('/', (req, res) => {
     res.send('Welcome to the Task Manager App');
 });
