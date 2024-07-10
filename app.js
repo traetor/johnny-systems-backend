@@ -14,8 +14,15 @@ const app = express();
 app.use(bodyParser.json());
 app.use('/uploads/avatars', express.static('uploads/avatars'));
 
+// Ustawienie opcji dla CORS
+const corsOptions = {
+    origin: '*', // Możesz dostosować do konkretnego origin
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type,Authorization',
+};
+
 // Dodaj middleware CORS przed zdefiniowanymi trasami API
-app.use(cors());
+app.use(cors(corsOptions));
 
 // Dodaj trasę dla głównej ścieżki
 app.get('/', (req, res) => {
