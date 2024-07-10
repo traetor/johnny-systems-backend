@@ -1,5 +1,6 @@
 const Task = require('../models/Task');
 
+// Create a new task
 exports.createTask = (req, res) => {
     const { title, description } = req.body;
     const user_id = req.user.id;
@@ -17,18 +18,17 @@ exports.createTask = (req, res) => {
     });
 };
 
+// Get tasks based on status or all tasks if no status provided
 exports.getTasks = (req, res) => {
     const user_id = req.user.id;
-    const { status } = req.query; // Pobranie statusu z zapytania
+    const { status } = req.query;
 
     if (!status) {
-        // Jeśli status nie jest podany, zwracamy wszystkie zadania użytkownika
         Task.findByUserId(user_id, (err, tasks) => {
             if (err) return res.status(500).send(err);
             res.send(tasks);
         });
     } else {
-        // Jeśli status jest podany, zwracamy zadania tylko z tym statusem
         Task.findByStatusAndUserId(status, user_id, (err, tasks) => {
             if (err) return res.status(500).send(err);
             res.send(tasks);
@@ -36,15 +36,12 @@ exports.getTasks = (req, res) => {
     }
 };
 
-
+// Update a task by ID
 exports.updateTask = (req, res) => {
     const taskId = req.params.id;
     const { title, description, status } = req.body;
-
-    // Utwórz pusty obiekt na dane, które będą aktualizowane
     const updatedFields = {};
 
-    // Dodaj tylko te pola do obiektu, które zostały przesłane w zapytaniu
     if (title) updatedFields.title = title;
     if (description) updatedFields.description = description;
     if (status) updatedFields.status = status;
@@ -55,6 +52,7 @@ exports.updateTask = (req, res) => {
     });
 };
 
+// Delete a task by ID
 exports.deleteTask = (req, res) => {
     const taskId = req.params.id;
 
