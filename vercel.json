@@ -8,6 +8,6 @@
     { "src": "/(.*)", "dest": "backend/app.js" }
   ],
   "env": {
-    "PORT": "3001"  // Ustawienie zmiennej środowiskowej PORT
+    "PORT": "3001"
   }
 }
