@@ -64,4 +64,32 @@ router.post('/login', authController.login);
 
 router.get('/activate/:token', authController.activate);
 
+/**
+ * @swagger
+ * /api/auth/check-email/{email}:
+ *   get:
+ *     summary: Check if email is available
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: email
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Email is available
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 available:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         description: Bad request
+ */
+router.get('/check-email/:email', authController.checkEmailAvailability);
+
 module.exports = router;
