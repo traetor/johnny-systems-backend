@@ -8,11 +8,17 @@ const nodemailer = require('nodemailer');
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: "Gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // true for 465, false for other ports
     auth: {
         user: process.env.EMAIL,
         pass: process.env.EMAIL_PASSWORD,
     },
+    tls: {
+        rejectUnauthorized: false
+    }
 });
 
 exports.register = (req, res) => {
