@@ -26,7 +26,7 @@ exports.getProfile = (req, res) => {
 
 exports.updateProfile = (req, res) => {
     const user_id = req.user.id;
-    const { username, email } = req.body;
+    const { username } = req.body; // Remove email from destructuring
     let avatar = null;
 
     if (req.file) {
@@ -43,7 +43,13 @@ exports.updateProfile = (req, res) => {
         });
     }
 
-    User.update(user_id, { username, email, avatar }, (err, result) => {
+    // Create an update object and conditionally include avatar
+    const updateData = { username };
+    if (avatar) {
+        updateData.avatar = avatar;
+    }
+
+    User.update(user_id, updateData, (err, result) => {
         if (err) return res.status(500).send(err);
 
         // Find the updated user profile and send it back with avatar in base64 format

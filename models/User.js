@@ -29,8 +29,23 @@ class User {
     }
 
     static update(id, data, callback) {
-        const sql = "UPDATE users SET username = $1, email = $2, avatar = $3 WHERE id = $4 RETURNING *";
-        pool.query(sql, [data.username, data.email, data.avatar, id], (err, res) => {
+        const fields = [];
+        const values = [];
+        let fieldIndex = 1;
+
+        if (data.username) {
+            fields.push(`username = $${fieldIndex++}`);
+            values.push(data.username);
+        }
+        if (data.avatar) {
+            fields.push(`avatar = $${fieldIndex++}`);
+            values.push(data.avatar);
+        }
+
+        const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = $${fieldIndex} RETURNING *`;
+        values.push(id);
+
+        pool.query(sql, values, (err, res) => {
             if (err) return callback(err);
             callback(null, res.rows[0]);
         });
