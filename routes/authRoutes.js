@@ -105,4 +105,7 @@ router.get('/activate/:token', authController.activate);
  */
 router.get('/check-email/:email', authController.checkEmailAvailability);
 
+// Dodajemy nową ścieżkę w authRoutes.js
+router.get('/check-username/:username', authController.checkUsernameAvailability);
+
 module.exports = router;

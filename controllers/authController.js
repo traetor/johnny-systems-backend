@@ -135,3 +135,19 @@ exports.checkEmailAvailability = (req, res) => {
         res.send({ available });
     });
 };
+
+// Dodajemy nową funkcję w authController.js
+exports.checkUsernameAvailability = (req, res) => {
+    const { username } = req.params;
+
+    User.findByUsername(username, (err, users) => {
+        if (err) {
+            console.error('Error finding user by username:', err);
+            return res.status(500).send({ message: `Error checking username availability` });
+        }
+
+        // Jeśli nie znaleziono użytkownika o podanej nazwie użytkownika, nazwa jest dostępna
+        const available = users.length === 0;
+        res.send({ available });
+    });
+};

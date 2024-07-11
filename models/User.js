@@ -20,6 +20,15 @@ class User {
         });
     }
 
+    // Dodajemy nową metodę w models/User.js
+    static findByUsername(username, callback) {
+        const sql = "SELECT * FROM users WHERE username = $1";
+        pool.query(sql, [username], (err, res) => {
+            if (err) return callback(err);
+            callback(null, res.rows);
+        });
+    }
+
     static findById(id, callback) {
         const sql = "SELECT * FROM users WHERE id = $1";
         pool.query(sql, [id], (err, res) => {
