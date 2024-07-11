@@ -46,6 +46,7 @@ exports.register = (req, res) => {
 
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) return res.status(500).send(error);
+
                 res.status(201).send({ message: 'User registered successfully. Please check your email to activate your account.' });
             });
         });
