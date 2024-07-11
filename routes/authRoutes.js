@@ -1,6 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const rateLimit = require('express-rate-limit');
+
+// Rate limiter middleware for login attempts
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Limit each IP to 5 login requests per `window` (here, per 15 minutes)
+    message: {
+        message: "Too many login attempts from this IP, please try again after 15 minutes"
+    },
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
 /**
  * @swagger
@@ -60,7 +72,8 @@ router.post('/register', authController.register);
  *       401:
  *         description: Invalid credentials
  */
-router.post('/login', authController.login);
+// Apply rate limiter to the login route
+router.post('/login', loginLimiter, authController.login);
 
 router.get('/activate/:token', authController.activate);
 
