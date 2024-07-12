@@ -30,7 +30,7 @@ const serverUrl = process.env.NODE_ENV === 'production'
     : `http://localhost:${process.env.PORT || 3001}`;
 
 // CDN CSS
-const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
+const CSS_URL = "https://johnny-systems.vercel.app/css/swagger-ui.min.css";
 
 const swaggerOptions = {
     swaggerDefinition: {
