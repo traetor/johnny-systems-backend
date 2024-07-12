@@ -3,22 +3,21 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const rateLimit = require('express-rate-limit');
 
-// Rate limiter middleware for login attempts
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // Limit each IP to 5 login requests per `window` (here, per 15 minutes)
+    windowMs: 15 * 60 * 1000, // 15 minut
+    max: 5, // Limit do 5 prób logowania na IP
     message: {
-        message: "Too many login attempts from this IP, please try again after 15 minutes"
+        message: "Zbyt wiele prób logowania z tego IP, spróbuj ponownie za 15 minut"
     },
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 
 /**
  * @swagger
  * /api/auth/register:
  *   post:
- *     summary: Register a new user
+ *     summary: Rejestracja nowego użytkownika
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -38,9 +37,9 @@ const loginLimiter = rateLimit({
  *                 example: password123
  *     responses:
  *       201:
- *         description: User registered successfully
+ *         description: Użytkownik zarejestrowany pomyślnie
  *       400:
- *         description: Bad request
+ *         description: Niepoprawne żądanie
  */
 router.post('/register', authController.register);
 
@@ -48,7 +47,7 @@ router.post('/register', authController.register);
  * @swagger
  * /api/auth/login:
  *   post:
- *     summary: Login user
+ *     summary: Logowanie użytkownika
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -68,11 +67,10 @@ router.post('/register', authController.register);
  *                 example: password123
  *     responses:
  *       200:
- *         description: User logged in successfully
+ *         description: Użytkownik zalogowany pomyślnie
  *       401:
- *         description: Invalid credentials
+ *         description: Niepoprawne dane logowania
  */
-// Apply rate limiter to the login route
 router.post('/login', loginLimiter, authController.login);
 
 router.get('/activate/:token', authController.activate);
@@ -81,7 +79,7 @@ router.get('/activate/:token', authController.activate);
  * @swagger
  * /api/auth/check-email/{email}:
  *   get:
- *     summary: Check if email is available
+ *     summary: Sprawdź dostępność emaila
  *     tags: [Auth]
  *     parameters:
  *       - in: path
@@ -91,7 +89,7 @@ router.get('/activate/:token', authController.activate);
  *           type: string
  *     responses:
  *       200:
- *         description: Email is available
+ *         description: Email dostępny
  *         content:
  *           application/json:
  *             schema:
@@ -100,12 +98,37 @@ router.get('/activate/:token', authController.activate);
  *                 available:
  *                   type: boolean
  *                   example: true
- *       400:
- *         description: Bad request
+ *       500:
+ *         description: Błąd serwera
  */
 router.get('/check-email/:email', authController.checkEmailAvailability);
 
-// Dodajemy nową ścieżkę w authRoutes.js
+/**
+ * @swagger
+ * /api/auth/check-username/{username}:
+ *   get:
+ *     summary: Sprawdź dostępność nazwy użytkownika
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Nazwa użytkownika dostępna
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 available:
+ *                   type: boolean
+ *                   example: true
+ *       500:
+ *         description: Błąd serwera
+ */
 router.get('/check-username/:username', authController.checkUsernameAvailability);
 
 module.exports = router;

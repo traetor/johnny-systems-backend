@@ -85,3 +85,14 @@ The application uses JWT for authentication. The token is stored in `localStorag
    git clone https://github.com/yourusername/task-management-app.git
    cd task-management-app
 
+# Rejestracja użytkownika
+curl -X POST http://localhost:3000/api/auth/register -H "Content-Type: application/json" -d '{"username": "testuser", "email": "test@example.com", "password": "password123"}'
+
+# Logowanie użytkownika
+curl -X POST http://localhost:3000/api/auth/login -H "Content-Type: application/json" -d '{"email": "test@example.com", "password": "password123"}'
+
+# Sprawdzenie dostępności emaila
+curl -X GET http://localhost:3000/api/auth/check-email/test@example.com
+
+# Sprawdzenie dostępności nazwy użytkownika
+curl -X GET http://localhost:3000/api/auth/check-username/testuser

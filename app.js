@@ -15,7 +15,7 @@ dotenv.config();
 const app = express();
 
 app.use(bodyParser.json());
-app.use('/uploads/avatars', express.static('uploads/avatars'));
+app.use('/uploads/avatars', express.static(path.join(__dirname, 'uploads/avatars')));
 
 const corsOptions = {
     origin: '*',
@@ -38,6 +38,10 @@ const swaggerOptions = {
             title: 'Task Manager API',
             version: '1.0.0',
             description: 'API documentation for the Task Manager App',
+            contact: {
+                name: 'Your Name',
+                email: 'your-email@example.com',
+            },
         },
         servers: [
             {
@@ -49,7 +53,7 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serveFiles(swaggerDocs), swaggerUi.setup(swaggerDocs, { explorer: true }));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, { explorer: true }));
 
 app.get('/', (req, res) => {
     res.send('Welcome to the Task Manager App');
