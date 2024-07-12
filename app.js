@@ -29,6 +29,9 @@ const serverUrl = process.env.NODE_ENV === 'production'
     ? 'https://johnny-systems-backend.vercel.app'
     : `http://localhost:${process.env.PORT || 3001}`;
 
+// CDN CSS
+const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
+
 const swaggerOptions = {
     swaggerDefinition: {
         openapi: '3.0.0',
@@ -47,7 +50,7 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, { customCssUrl: CSS_URL }));
 
 app.get('/', (req, res) => {
     res.send('Welcome to the Task Manager App');
