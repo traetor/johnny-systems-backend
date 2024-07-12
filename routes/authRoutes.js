@@ -4,10 +4,10 @@ const authController = require('../controllers/authController');
 const rateLimit = require('express-rate-limit');
 
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minut
-    max: 5, // Limit do 5 prób logowania na IP
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Limit each IP to 5 login requests per windowMs
     message: {
-        message: "Zbyt wiele prób logowania z tego IP, spróbuj ponownie za 15 minut"
+        message: "Too many login attempts from this IP, please try again after 15 minutes"
     },
     standardHeaders: true,
     legacyHeaders: false,
@@ -17,7 +17,7 @@ const loginLimiter = rateLimit({
  * @swagger
  * /api/auth/register:
  *   post:
- *     summary: Rejestracja nowego użytkownika
+ *     summary: Register a new user
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -37,9 +37,9 @@ const loginLimiter = rateLimit({
  *                 example: password123
  *     responses:
  *       201:
- *         description: Użytkownik zarejestrowany pomyślnie
+ *         description: User registered successfully
  *       400:
- *         description: Niepoprawne żądanie
+ *         description: Bad request
  */
 router.post('/register', authController.register);
 
@@ -47,7 +47,7 @@ router.post('/register', authController.register);
  * @swagger
  * /api/auth/login:
  *   post:
- *     summary: Logowanie użytkownika
+ *     summary: User login
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -67,19 +67,39 @@ router.post('/register', authController.register);
  *                 example: password123
  *     responses:
  *       200:
- *         description: Użytkownik zalogowany pomyślnie
+ *         description: User logged in successfully
  *       401:
- *         description: Niepoprawne dane logowania
+ *         description: Invalid login credentials
  */
 router.post('/login', loginLimiter, authController.login);
 
+/**
+ * @swagger
+ * /api/auth/activate/{token}:
+ *   get:
+ *     summary: Activate a new user's account
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Account activated successfully
+ *       400:
+ *         description: Invalid or expired activation token
+ *       500:
+ *         description: Server error
+ */
 router.get('/activate/:token', authController.activate);
 
 /**
  * @swagger
  * /api/auth/check-email/{email}:
  *   get:
- *     summary: Sprawdź dostępność emaila
+ *     summary: Check email availability
  *     tags: [Auth]
  *     parameters:
  *       - in: path
@@ -89,7 +109,7 @@ router.get('/activate/:token', authController.activate);
  *           type: string
  *     responses:
  *       200:
- *         description: Email dostępny
+ *         description: Email is available
  *         content:
  *           application/json:
  *             schema:
@@ -99,7 +119,7 @@ router.get('/activate/:token', authController.activate);
  *                   type: boolean
  *                   example: true
  *       500:
- *         description: Błąd serwera
+ *         description: Server error
  */
 router.get('/check-email/:email', authController.checkEmailAvailability);
 
@@ -107,7 +127,7 @@ router.get('/check-email/:email', authController.checkEmailAvailability);
  * @swagger
  * /api/auth/check-username/{username}:
  *   get:
- *     summary: Sprawdź dostępność nazwy użytkownika
+ *     summary: Check username availability
  *     tags: [Auth]
  *     parameters:
  *       - in: path
@@ -117,7 +137,7 @@ router.get('/check-email/:email', authController.checkEmailAvailability);
  *           type: string
  *     responses:
  *       200:
- *         description: Nazwa użytkownika dostępna
+ *         description: Username is available
  *         content:
  *           application/json:
  *             schema:
@@ -127,7 +147,7 @@ router.get('/check-email/:email', authController.checkEmailAvailability);
  *                   type: boolean
  *                   example: true
  *       500:
- *         description: Błąd serwera
+ *         description: Server error
  */
 router.get('/check-username/:username', authController.checkUsernameAvailability);
 
