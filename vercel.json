@@ -3,10 +3,10 @@
   "builds": [
     { "src": "app.js", "use": "@vercel/node" }
   ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "app.js" },
-    { "src": "/api-docs/(.*)", "dest": "app.js" },
-    { "src": "/(.*)", "dest": "app.js" }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/app.js" },
+    { "source": "/api-docs/(.*)", "destination": "/app.js" },
+    { "source": "/(.*)", "destination": "/app.js" }
   ],
   "env": {
     "PORT": "3001",
