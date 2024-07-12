@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const path = require('path'); // Dodaj import path
+const path = require('path');
 
 const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
@@ -15,7 +15,7 @@ dotenv.config();
 const app = express();
 
 app.use(bodyParser.json());
-app.use('/uploads/avatars', express.static(path.join(__dirname, 'uploads/avatars')));
+app.use('/uploads/avatars', express.static('uploads/avatars'));
 
 const corsOptions = {
     origin: '*',
@@ -25,12 +25,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Dynamic URL based on environment
 const serverUrl = process.env.NODE_ENV === 'production'
     ? 'https://johnny-systems-backend.vercel.app'
     : `http://localhost:${process.env.PORT || 3001}`;
 
-// Konfiguracja Swaggera
 const swaggerOptions = {
     swaggerDefinition: {
         openapi: '3.0.0',
@@ -38,10 +36,6 @@ const swaggerOptions = {
             title: 'Task Manager API',
             version: '1.0.0',
             description: 'API documentation for the Task Manager App',
-            contact: {
-                name: 'Your Name',
-                email: 'your-email@example.com',
-            },
         },
         servers: [
             {

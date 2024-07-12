@@ -8,6 +8,9 @@
     { "src": "/api-docs/(.*)", "dest": "app.js" },
     { "src": "/(.*)", "dest": "app.js" }
   ],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" }
+  ],
   "env": {
     "PORT": "3001",
     "NODE_ENV": "production"
