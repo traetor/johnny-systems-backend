@@ -36,7 +36,7 @@ const swaggerOptions = {
     swaggerDefinition: {
         openapi: '3.0.0',
         info: {
-            title: 'Task Manager API',
+            title: 'Johnny Systems API',
             version: '1.0.0',
             description: 'API documentation for the Task Manager App',
         },

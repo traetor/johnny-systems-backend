@@ -72,14 +72,15 @@ The base URL for the API is defined in `apiConfig.js`.
 
 ### Endpoints
 
+- **POST /auth/register**: Registers a new user.
+- **POST /auth/login**: Authenticates a user and returns a token.
+- **GET /auth/activate/:token**: Activates a new user's account.
+- **GET /auth/check-email/:email**: Checks if an email is already in use.
+- **GET /auth/check-username/:username**: Checks if a username is already in use.
 - **GET /tasks**: Retrieves all tasks.
 - **POST /tasks**: Creates a new task.
 - **PUT /tasks/:id**: Updates a task by ID.
 - **DELETE /tasks/:id**: Deletes a task by ID.
-- **POST /auth/register**: Registers a new user.
-- **POST /auth/login**: Authenticates a user and returns a token.
-- **GET /auth/check-email/:email**: Checks if an email is already in use.
-- **GET /auth/check-username/:username**: Checks if a username is already in use.
 
 ## Authentication
 
