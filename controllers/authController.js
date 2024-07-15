@@ -151,3 +151,48 @@ exports.checkUsernameAvailability = (req, res) => {
         res.send({ available });
     });
 };
+
+exports.resendActivationEmail = (req, res) => {
+    const { email } = req.body;
+
+    User.findByEmail(email, (err, users) => {
+        if (err) {
+            console.error('Error finding user by email:', err);
+            return res.status(500).send({ message: 'Error finding user. Please try again later.' });
+        }
+        if (users.length === 0) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+
+        const user = users[0];
+        if (user.is_active) {
+            return res.status(400).send({ message: 'Account is already activated' });
+        }
+
+        const activationToken = crypto.randomBytes(20).toString('hex');
+        User.updateActivationToken(user.id, activationToken, (err) => {
+            if (err) {
+                console.error('Error updating activation token:', err);
+                return res.status(500).send({ message: 'Error during resend activation email. Please try again later.' });
+            }
+
+            const activationLink = `${process.env.FRONTEND_URL}/activate/${activationToken}`;
+            const mailOptions = {
+                from: process.env.EMAIL,
+                to: email,
+                subject: 'Account Activation',
+                html: `<p>Please click the following link to activate your account: <a href="${activationLink}">Activate</a></p>`,
+            };
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error('Error sending activation email:', error);
+                    return res.status(500).send({ message: 'Error during resend activation email. Please try again later.' });
+                }
+
+                res.status(200).send({ message: 'Activation email resent successfully. Please check your email.' });
+            });
+        });
+    });
+};
+
