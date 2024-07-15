@@ -155,34 +155,4 @@ router.get('/check-email/:email', authController.checkEmailAvailability);
  */
 router.get('/check-username/:username', authController.checkUsernameAvailability);
 
-/**
- * @swagger
- * /api/auth/resend-activation:
- *   post:
- *     summary: Resend activation email
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *             properties:
- *               email:
- *                 type: string
- *                 example: user@example.com
- *     responses:
- *       200:
- *         description: Activation email resent successfully
- *       400:
- *         description: Bad request
- *       404:
- *         description: User not found
- *       500:
- *         description: Server error
- */
-router.post('/resend-activation', authController.resendActivationEmail);
-
 module.exports = router;
