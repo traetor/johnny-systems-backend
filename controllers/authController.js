@@ -84,35 +84,71 @@ exports.activate = (req, res) => {
     });
 };
 
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const transporter = require('../config/nodemailer');
+const User = require('../models/User');
+
+const resendActivationEmail = (user, callback) => {
+    const activationToken = crypto.randomBytes(20).toString('hex');
+    User.updateActivationToken(user.id, activationToken, (err) => {
+        if (err) {
+            console.error('Błąd aktualizacji tokenu aktywacyjnego:', err);
+            return callback(err);
+        }
+
+        const activationLink = `${process.env.FRONTEND_URL}/activate/${activationToken}`;
+        const mailOptions = {
+            from: process.env.EMAIL,
+            to: user.email,
+            subject: 'Ponowne wysłanie aktywacji konta',
+            html: `<p>Twoje konto nie jest aktywowane. Kliknij poniższy link, aby aktywować swoje konto: <a href="${activationLink}">Aktywuj</a></p>`,
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Błąd wysyłania emaila aktywacyjnego:', error);
+                return callback(error);
+            }
+            callback(null);
+        });
+    });
+};
+
 exports.login = (req, res) => {
     const { email, password } = req.body;
 
-    // Sprawdzenie, czy podano email i hasło
     if (!email || !password) {
-        return res.status(400).send({ message: `Email and password are required` });
+        return res.status(400).send({ message: 'Email i hasło są wymagane' });
     }
 
     User.findByEmail(email, (err, users) => {
         if (err) {
-            console.error('Error finding user by email:', err);
-            return res.status(500).send({ message: `Error finding user. Please try again later.` });
+            console.error('Błąd wyszukiwania użytkownika po emailu:', err);
+            return res.status(500).send({ message: 'Błąd wyszukiwania użytkownika. Spróbuj ponownie później.' });
         }
         if (users.length === 0) {
-            return res.status(404).send({ message: `User not found` });
+            return res.status(404).send({ message: 'Użytkownik nie znaleziony' });
         }
 
         const user = users[0];
         if (!user.is_active) {
-            return res.status(403).send({ message: `Account is not activated. Please check your email for activation link.` });
+            return resendActivationEmail(user, (error) => {
+                if (error) {
+                    return res.status(500).send({ message: 'Błąd ponownego wysyłania emaila aktywacyjnego. Spróbuj ponownie później.' });
+                }
+                return res.status(403).send({ message: 'Konto nie jest aktywowane. Nowy link aktywacyjny został wysłany na twój email.' });
+            });
         }
 
         bcrypt.compare(password, user.password, (err, match) => {
             if (err) {
-                console.error('Error comparing passwords:', err);
-                return res.status(500).send({ message: `Error comparing passwords. Please try again later.` });
+                console.error('Błąd porównywania haseł:', err);
+                return res.status(500).send({ message: 'Błąd porównywania haseł. Spróbuj ponownie później.' });
             }
             if (!match) {
-                return res.status(401).send({ message: `Invalid credentials` });
+                return res.status(401).send({ message: 'Nieprawidłowe dane' });
             }
 
             const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -120,6 +156,7 @@ exports.login = (req, res) => {
         });
     });
 };
+
 
 exports.checkEmailAvailability = (req, res) => {
     const { email } = req.params;
@@ -151,48 +188,3 @@ exports.checkUsernameAvailability = (req, res) => {
         res.send({ available });
     });
 };
-
-exports.resendActivationEmail = (req, res) => {
-    const { email } = req.body;
-
-    User.findByEmail(email, (err, users) => {
-        if (err) {
-            console.error('Error finding user by email:', err);
-            return res.status(500).send({ message: 'Error finding user. Please try again later.' });
-        }
-        if (users.length === 0) {
-            return res.status(404).send({ message: 'User not found' });
-        }
-
-        const user = users[0];
-        if (user.is_active) {
-            return res.status(400).send({ message: 'Account is already activated' });
-        }
-
-        const activationToken = crypto.randomBytes(20).toString('hex');
-        User.updateActivationToken(user.id, activationToken, (err) => {
-            if (err) {
-                console.error('Error updating activation token:', err);
-                return res.status(500).send({ message: 'Error during resend activation email. Please try again later.' });
-            }
-
-            const activationLink = `${process.env.FRONTEND_URL}/activate/${activationToken}`;
-            const mailOptions = {
-                from: process.env.EMAIL,
-                to: email,
-                subject: 'Account Activation',
-                html: `<p>Please click the following link to activate your account: <a href="${activationLink}">Activate</a></p>`,
-            };
-
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    console.error('Error sending activation email:', error);
-                    return res.status(500).send({ message: 'Error during resend activation email. Please try again later.' });
-                }
-
-                res.status(200).send({ message: 'Activation email resent successfully. Please check your email.' });
-            });
-        });
-    });
-};
-
