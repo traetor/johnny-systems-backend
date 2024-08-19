@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const notesController = require('../controllers/notesController');
+const { authMiddleware } = require('../middlewares/authMiddleware');  // Importuj authMiddleware
 
-// Dodaj middleware autoryzacji, np. authenticateUser
+// Dodaj middleware autoryzacji - authMiddleware
 
 /**
  * @swagger
@@ -33,7 +34,7 @@ const notesController = require('../controllers/notesController');
  *       401:
  *         description: Unauthorized
  */
-router.get('/', authenticateUser, notesController.getNotes);
+router.get('/', authMiddleware, notesController.getNotes);
 
 /**
  * @swagger
@@ -68,7 +69,7 @@ router.get('/', authenticateUser, notesController.getNotes);
  *       401:
  *         description: Unauthorized
  */
-router.post('/create', authenticateUser, notesController.createNote);
+router.post('/create', authMiddleware, notesController.createNote);
 
 /**
  * @swagger
@@ -105,7 +106,7 @@ router.post('/create', authenticateUser, notesController.createNote);
  *       404:
  *         description: Note not found
  */
-router.put('/:id', authenticateUser, notesController.updateNote);
+router.put('/:id', authMiddleware, notesController.updateNote);
 
 /**
  * @swagger
@@ -127,6 +128,6 @@ router.put('/:id', authenticateUser, notesController.updateNote);
  *       404:
  *         description: Note not found
  */
-router.delete('/:id', authenticateUser, notesController.deleteNote);
+router.delete('/:id', authMiddleware, notesController.deleteNote);
 
 module.exports = router;
