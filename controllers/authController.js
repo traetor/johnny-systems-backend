@@ -195,3 +195,76 @@ exports.resendActivationEmail = (req, res) => {
         });
     });
 };
+
+exports.forgotPassword = (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).send({ message: 'Email is required' });
+    }
+
+    User.findByEmail(email, (err, users) => {
+        if (err) {
+            console.error('Error finding user by email:', err);
+            return res.status(500).send({ message: 'Error finding user. Please try again later.' });
+        }
+        if (users.length === 0) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+
+        const user = users[0];
+        const resetToken = crypto.randomBytes(20).toString('hex');
+
+        User.updateResetToken(user.id, resetToken, (err) => {
+            if (err) {
+                console.error('Error updating reset token:', err);
+                return res.status(500).send({ message: 'Error generating reset token. Please try again later.' });
+            }
+
+            const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+            const mailOptions = {
+                from: process.env.EMAIL,
+                to: email,
+                subject: 'Password Reset',
+                html: `<p>Click the following link to reset your password: <a href="${resetLink}">Reset Password</a></p>`,
+            };
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error('Error sending reset password email:', error);
+                    return res.status(500).send({ message: 'Error sending reset password email. Please try again later.' });
+                }
+
+                res.status(200).send({ message: 'Reset password email sent successfully. Please check your email.' });
+            });
+        });
+    });
+};
+
+exports.resetPassword = (req, res) => {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+        return res.status(400).send({ message: 'New password is required' });
+    }
+
+    bcrypt.hash(newPassword, 10, (err, hash) => {
+        if (err) {
+            console.error('Error hashing password:', err);
+            return res.status(500).send({ message: 'Error hashing password. Please try again later.' });
+        }
+
+        User.resetPassword(token, hash, (err, user) => {
+            if (err) {
+                console.error('Error resetting password:', err);
+                return res.status(500).send({ message: 'Error resetting password. Please try again later.' });
+            }
+            if (!user) {
+                return res.status(400).send({ message: 'Invalid or expired reset token.' });
+            }
+
+            res.send({ message: 'Password reset successfully. You can now log in with your new password.' });
+        });
+    });
+};

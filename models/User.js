@@ -75,6 +75,22 @@ class User {
             callback(null);
         });
     }
+
+    static updateResetToken(id, resetToken, callback) {
+        const sql = "UPDATE users SET reset_token = $1, reset_token_expiry = NOW() + INTERVAL '1 hour' WHERE id = $2";
+        pool.query(sql, [resetToken, id], (err, res) => {
+            if (err) return callback(err);
+            callback(null);
+        });
+    }
+
+    static resetPassword(token, newPassword, callback) {
+        const sql = "UPDATE users SET password = $1, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = $2 AND reset_token_expiry > NOW() RETURNING *";
+        pool.query(sql, [newPassword, token], (err, res) => {
+            if (err) return callback(err);
+            callback(null, res.rows[0]);
+        });
+    }
 }
 
 module.exports = User;

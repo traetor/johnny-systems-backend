@@ -185,4 +185,68 @@ router.get('/check-username/:username', authController.checkUsernameAvailability
  */
 router.post('/resend-activation', authController.resendActivationEmail);
 
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Request password reset link
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *     responses:
+ *       200:
+ *         description: Password reset email sent successfully
+ *       400:
+ *         description: Email is required
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
+router.post('/forgot-password', authController.forgotPassword);
+
+/**
+ * @swagger
+ * /api/auth/reset-password/{token}:
+ *   post:
+ *     summary: Reset user password
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - newPassword
+ *             properties:
+ *               newPassword:
+ *                 type: string
+ *                 example: newpassword123
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Invalid or expired reset token
+ *       500:
+ *         description: Server error
+ */
+router.post('/reset-password/:token', authController.resetPassword);
+
 module.exports = router;
