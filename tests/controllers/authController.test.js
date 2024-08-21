@@ -1,3 +1,4 @@
+// src/controllers/authController.test.js
 const request = require('supertest');
 const app = require('../../app'); // Ścieżka do pliku głównego aplikacji, np. app.js
 
@@ -5,7 +6,7 @@ describe('Auth Controller', () => {
     // Test dla rejestracji użytkownika
     it('should register a new user', async () => {
         const response = await request(app)
-            .post('/register')
+            .post('/api/auth/register')
             .send({
                 username: 'testuser',
                 email: 'test@example.com',
@@ -18,7 +19,7 @@ describe('Auth Controller', () => {
     // Test dla logowania
     it('should log in a user', async () => {
         const response = await request(app)
-            .post('/login')
+            .post('/api/auth/login')
             .send({
                 email: 'test@example.com',
                 password: 'password123'
@@ -30,7 +31,7 @@ describe('Auth Controller', () => {
     // Test dla sprawdzania dostępności emaila
     it('should check email availability', async () => {
         const response = await request(app)
-            .get('/check-email/test@example.com');
+            .get('/api/auth/check-email/test@example.com');
         expect(response.statusCode).toBe(200);
         expect(response.body.available).toBe(true); // Zakładając, że email jest dostępny
     });

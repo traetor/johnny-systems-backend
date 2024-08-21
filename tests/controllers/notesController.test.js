@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../../app'); // Ścieżka do pliku głównego aplikacji, np. app.js
+const app = require('../../app'); // Ścieżka do pliku głównego aplikacji
 
 describe('Notes Controller', () => {
     let token;
@@ -7,7 +7,7 @@ describe('Notes Controller', () => {
     // Przed testami: zaloguj się i uzyskaj token
     beforeAll(async () => {
         const response = await request(app)
-            .post('/login')
+            .post('/api/auth/login') // Zaktualizowana ścieżka logowania
             .send({
                 email: 'test@example.com',
                 password: 'password123'
@@ -18,7 +18,7 @@ describe('Notes Controller', () => {
     // Test tworzenia notatki
     it('should create a new note', async () => {
         const response = await request(app)
-            .post('/notes')
+            .post('/api/notes') // Zaktualizowana ścieżka
             .set('Authorization', `Bearer ${token}`)
             .send({
                 title: 'Test Note',
@@ -32,7 +32,7 @@ describe('Notes Controller', () => {
     // Test pobierania notatek
     it('should get all notes', async () => {
         const response = await request(app)
-            .get('/notes')
+            .get('/api/notes') // Zaktualizowana ścieżka
             .set('Authorization', `Bearer ${token}`);
         expect(response.statusCode).toBe(200);
         expect(Array.isArray(response.body)).toBe(true);

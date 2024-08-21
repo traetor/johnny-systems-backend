@@ -62,7 +62,12 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notes', noteRoutes);
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Uruchamiaj serwer tylko, jeśli nie jesteś w trybie testowym
+if (process.env.NODE_ENV !== 'test') {
+    const PORT = process.env.PORT || 3001;
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+module.exports = app; // Eksportuj aplikację dla testów
