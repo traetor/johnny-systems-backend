@@ -23,7 +23,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const verifyRecaptcha = async (recaptchaToken) => {
-    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY; // Ensure this is correctly set
 
     try {
         const response = await axios.post(
@@ -36,7 +36,9 @@ const verifyRecaptcha = async (recaptchaToken) => {
                 },
             }
         );
-        return response.data.success;
+
+        // Check if reCAPTCHA verification was successful
+        return response.data.success && response.data.score >= 0.5; // Adjust the score threshold as needed
     } catch (error) {
         console.error('Error verifying reCAPTCHA:', error);
         return false;
