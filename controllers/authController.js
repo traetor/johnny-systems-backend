@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const axios = require('axios');
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ const transporter = nodemailer.createTransport({
     service: "Gmail",
     host: "smtp.gmail.com",
     port: 465,
-    secure: true, // true for 465, false for other ports
+    secure: true,
     auth: {
         user: process.env.EMAIL,
         pass: process.env.EMAIL_PASSWORD,
@@ -21,33 +22,48 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+const verifyRecaptcha = async (recaptchaToken) => {
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+
+    try {
+        const response = await axios.post(
+            `https://www.google.com/recaptcha/api/siteverify`,
+            null,
+            {
+                params: {
+                    secret: secretKey,
+                    response: recaptchaToken,
+                },
+            }
+        );
+        return response.data.success;
+    } catch (error) {
+        console.error('Error verifying reCAPTCHA:', error);
+        return false;
+    }
+};
+
 exports.register = (req, res) => {
     const { username, email, password } = req.body;
-    const { language } = req.body;
 
-    // Sprawdzenie, czy podano email i hasło
     if (!email || !password) {
-        return res.status(400).send({ message: `Email and password are required` });
+        return res.status(400).send({ message: 'Email and password are required' });
     }
 
-    // Generowanie tokenu aktywacyjnego
     const activationToken = crypto.randomBytes(20).toString('hex');
 
-    // Haszowanie hasła
     bcrypt.hash(password, 10, (err, hash) => {
         if (err) {
             console.error('Error hashing password:', err);
-            return res.status(500).send({ message: `Error during registration. Please try again later.` });
+            return res.status(500).send({ message: 'Error during registration. Please try again later.' });
         }
 
-        // Tworzenie użytkownika
         User.create({ username, email, password: hash, avatar: null, activation_token: activationToken }, (err, result) => {
             if (err) {
                 console.error('Error creating user:', err);
-                return res.status(500).send({ message: `Error during registration. Please try again later.` });
+                return res.status(500).send({ message: 'Error during registration. Please try again later.' });
             }
 
-            // Wysyłanie emaila aktywacyjnego
             const activationLink = `${process.env.FRONTEND_URL}/activate/${activationToken}`;
             const mailOptions = {
                 from: process.env.EMAIL,
@@ -59,10 +75,10 @@ exports.register = (req, res) => {
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
                     console.error('Error sending activation email:', error);
-                    return res.status(500).send({ message: `Error during registration. Please try again later.` });
+                    return res.status(500).send({ message: 'Error during registration. Please try again later.' });
                 }
 
-                res.status(201).send({ message: `User registered successfully. Please check your email to activate your account.` });
+                res.status(201).send({ message: 'User registered successfully. Please check your email to activate your account.' });
             });
         });
     });
@@ -74,45 +90,49 @@ exports.activate = (req, res) => {
     User.activate(token, (err, user) => {
         if (err) {
             console.error('Error activating account:', err);
-            return res.status(500).send({ message: `Error activating account. Please try again later.` });
+            return res.status(500).send({ message: 'Error activating account. Please try again later.' });
         }
         if (!user) {
-            return res.status(400).send({ message: `Invalid or expired activation token.` });
+            return res.status(400).send({ message: 'Invalid or expired activation token.' });
         }
 
-        res.send({ message: `Account activated successfully. You can now log in.` });
+        res.send({ message: 'Account activated successfully. You can now log in.' });
     });
 };
 
-exports.login = (req, res) => {
-    const { email, password } = req.body;
+exports.login = async (req, res) => {
+    const { email, password, captcha } = req.body;
 
-    // Sprawdzenie, czy podano email i hasło
-    if (!email || !password) {
-        return res.status(400).send({ message: `Email and password are required` });
+    if (!email || !password || !captcha) {
+        return res.status(400).send({ message: 'Email, password, and reCAPTCHA response are required' });
+    }
+
+    const isCaptchaValid = await verifyRecaptcha(captcha);
+    if (!isCaptchaValid) {
+        return res.status(400).send({ message: 'Invalid reCAPTCHA. Please try again.' });
     }
 
     User.findByEmail(email, (err, users) => {
         if (err) {
             console.error('Error finding user by email:', err);
-            return res.status(500).send({ message: `Error finding user. Please try again later.` });
+            return res.status(500).send({ message: 'Error finding user. Please try again later.' });
         }
         if (users.length === 0) {
-            return res.status(404).send({ message: `User not found` });
+            return res.status(404).send({ message: 'User not found' });
         }
 
         const user = users[0];
         if (!user.is_active) {
-            return res.status(403).send({ message: `Account is not activated. Please check your email for activation link.` });
+            return res.status(403).send({ message: 'Account is not activated. Please check your email for activation link.' });
         }
 
         bcrypt.compare(password, user.password, (err, match) => {
             if (err) {
                 console.error('Error comparing passwords:', err);
-                return res.status(500).send({ message: `Error comparing passwords. Please try again later.` });
+                return res.status(500).send({ message: 'Error comparing passwords. Please try again later.' });
             }
             if (!match) {
-                return res.status(401).send({ message: `Invalid credentials` });
+                return res.status(401).send({ message: 'Invalid credentials' });
             }
 
             const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -127,26 +147,23 @@ exports.checkEmailAvailability = (req, res) => {
     User.findByEmail(email, (err, users) => {
         if (err) {
             console.error('Error finding user by email:', err);
-            return res.status(500).send({ message: `Error checking email availability` });
+            return res.status(500).send({ message: 'Error checking email availability' });
         }
 
-        // Jeśli nie znaleziono użytkownika o podanym emailu, email jest dostępny
         const available = users.length === 0;
         res.send({ available });
     });
 };
 
-// Dodajemy nową funkcję w authController.js
 exports.checkUsernameAvailability = (req, res) => {
     const { username } = req.params;
 
     User.findByUsername(username, (err, users) => {
         if (err) {
             console.error('Error finding user by username:', err);
-            return res.status(500).send({ message: `Error checking username availability` });
+            return res.status(500).send({ message: 'Error checking username availability' });
         }
 
-        // Jeśli nie znaleziono użytkownika o podanej nazwie użytkownika, nazwa jest dostępna
         const available = users.length === 0;
         res.send({ available });
     });
@@ -231,11 +248,11 @@ exports.forgotPassword = (req, res) => {
 
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
-                    console.error('Error sending reset password email:', error);
-                    return res.status(500).send({ message: 'Error sending reset password email. Please try again later.' });
+                    console.error('Error sending password reset email:', error);
+                    return res.status(500).send({ message: 'Error during password reset. Please try again later.' });
                 }
 
-                res.status(200).send({ message: 'Reset password email sent successfully. Please check your email.' });
+                res.status(200).send({ message: 'Password reset email sent successfully. Please check your email.' });
             });
         });
     });
@@ -243,28 +260,36 @@ exports.forgotPassword = (req, res) => {
 
 exports.resetPassword = (req, res) => {
     const { token } = req.params;
-    const { newPassword } = req.body;
+    const { password } = req.body;
 
-    if (!newPassword) {
-        return res.status(400).send({ message: 'New password is required' });
+    if (!password) {
+        return res.status(400).send({ message: 'Password is required' });
     }
 
-    bcrypt.hash(newPassword, 10, (err, hash) => {
+    User.findByResetToken(token, (err, users) => {
         if (err) {
-            console.error('Error hashing password:', err);
-            return res.status(500).send({ message: 'Error hashing password. Please try again later.' });
+            console.error('Error finding user by reset token:', err);
+            return res.status(500).send({ message: 'Error finding user. Please try again later.' });
+        }
+        if (users.length === 0) {
+            return res.status(404).send({ message: 'Invalid or expired reset token' });
         }
 
-        User.resetPassword(token, hash, (err, user) => {
+        const user = users[0];
+        bcrypt.hash(password, 10, (err, hash) => {
             if (err) {
-                console.error('Error resetting password:', err);
+                console.error('Error hashing password:', err);
                 return res.status(500).send({ message: 'Error resetting password. Please try again later.' });
             }
-            if (!user) {
-                return res.status(400).send({ message: 'Invalid or expired reset token.' });
-            }
 
-            res.send({ message: 'Password reset successfully. You can now log in with your new password.' });
+            User.updatePassword(user.id, hash, (err) => {
+                if (err) {
+                    console.error('Error updating password:', err);
+                    return res.status(500).send({ message: 'Error resetting password. Please try again later.' });
+                }
+
+                res.send({ message: 'Password reset successfully. You can now log in with your new password.' });
+            });
         });
     });
 };
