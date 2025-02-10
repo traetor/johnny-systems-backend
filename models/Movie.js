@@ -20,7 +20,6 @@ class Movie {
             `INSERT INTO movies (title, year, image_url, description) VALUES ($1, $2, $3, $4) RETURNING *`,
             [title, year, image_url, description]
         );
-
         const movieId = result.rows[0].id;
 
         for (let actorName of actors) {
@@ -39,36 +38,28 @@ class Movie {
             `UPDATE movies SET title = $1, year = $2, image_url = $3, description = $4 WHERE id = $5 RETURNING *`,
             [title, year, image_url, description, id]
         );
-
         if (result.rows.length === 0) {
-            return null; // Jeśli film o podanym ID nie istnieje
+            return null; // Film nie znaleziony
         }
-
-        const updatedMovie = result.rows[0];
-
-        // Można dodać logikę aktualizacji aktorów, jeśli to konieczne
-        return updatedMovie;
+        return result.rows[0];
     }
 
     static async delete(id) {
         const result = await pool.query('DELETE FROM movies WHERE id = $1 RETURNING *', [id]);
-        return result.rows[0]; // Zwróci usunięty film lub null jeśli film nie istniał
+        return result.rows[0];
     }
 
-    // Nowa metoda dodająca aktora do filmu
     static async addActor(movieId, actorId) {
         await pool.query('INSERT INTO movie_actors (movie_id, actor_id) VALUES ($1, $2)', [movieId, actorId]);
     }
 
-    // Nowa metoda usuwająca aktora z filmu
     static async removeActor(movieId, actorId) {
         await pool.query('DELETE FROM movie_actors WHERE movie_id = $1 AND actor_id = $2', [movieId, actorId]);
     }
 
-    // Nowa metoda do pobierania filmu po ID
     static async getById(id) {
         const result = await pool.query('SELECT * FROM movies WHERE id = $1', [id]);
-        return result.rows[0]; // Zwraca film lub null, jeśli nie znaleziono
+        return result.rows[0];
     }
 }
 

@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const actorController = require('../controllers/actorController');
-const { authMiddleware } = require('../middlewares/authMiddleware'); // Middleware autoryzacji
+const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware'); // Middleware autoryzacji
 
 /**
  * @swagger
@@ -62,6 +62,6 @@ router.get('/', actorController.getAllActors);
  *       401:
  *         description: Unauthorized
  */
-router.post('/', authMiddleware, actorController.createActor);
+router.post('/', authMiddleware, isAdmin, actorController.createActor);
 
 module.exports = router;

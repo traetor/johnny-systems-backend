@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const movieController = require('../controllers/movieController');
-const { authMiddleware } = require('../middlewares/authMiddleware');  // Middleware autoryzacji
+const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');  // Middleware autoryzacji
 
 /**
  * @swagger
@@ -89,7 +89,7 @@ router.get('/', movieController.getMovies);
  *       401:
  *         description: Unauthorized
  */
-router.post('/', authMiddleware, movieController.createMovie);
+router.post('/', authMiddleware, isAdmin, movieController.createMovie);
 
 /**
  * @swagger
@@ -135,7 +135,7 @@ router.post('/', authMiddleware, movieController.createMovie);
  *       404:
  *         description: Movie not found
  */
-router.put('/:id', authMiddleware, movieController.updateMovie);
+router.put('/:id', authMiddleware, isAdmin, movieController.updateMovie);
 
 /**
  * @swagger
@@ -160,7 +160,7 @@ router.put('/:id', authMiddleware, movieController.updateMovie);
  *       404:
  *         description: Movie not found
  */
-router.delete('/:id', authMiddleware, movieController.deleteMovie);
+router.delete('/:id', authMiddleware, isAdmin, movieController.deleteMovie);
 
 /**
  * @swagger
@@ -199,7 +199,7 @@ router.delete('/:id', authMiddleware, movieController.deleteMovie);
  *       401:
  *         description: Unauthorized
  */
-router.post('/:id/actors', authMiddleware, movieController.addActorsToMovie);
+router.post('/:id/actors', authMiddleware, isAdmin, movieController.addActorsToMovie);
 
 /**
  * @swagger
@@ -232,6 +232,6 @@ router.post('/:id/actors', authMiddleware, movieController.addActorsToMovie);
  *       401:
  *         description: Unauthorized
  */
-router.delete('/:id/actors/:actorId', authMiddleware, movieController.removeActorFromMovie);
+router.delete('/:id/actors/:actorId', authMiddleware, isAdmin, movieController.removeActorFromMovie);
 
 module.exports = router;

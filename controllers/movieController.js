@@ -2,6 +2,7 @@
 const Movie = require('../models/Movie');
 const Actor = require('../models/Actor');
 
+// Pobieranie wszystkich filmów
 exports.getMovies = async (req, res) => {
     try {
         const movies = await Movie.getAll();
@@ -11,6 +12,7 @@ exports.getMovies = async (req, res) => {
     }
 };
 
+// Tworzenie nowego filmu
 exports.createMovie = async (req, res) => {
     try {
         const { title, year, image_url, description, actors } = req.body;
@@ -21,14 +23,12 @@ exports.createMovie = async (req, res) => {
     }
 };
 
+// Aktualizacja filmu
 exports.updateMovie = async (req, res) => {
     try {
         const { id } = req.params;
         const { title, year, image_url, description, actors } = req.body;
-
-        // Aktualizacja filmu
         const updatedMovie = await Movie.update(id, { title, year, image_url, description, actors });
-
         if (updatedMovie) {
             res.json(updatedMovie);
         } else {
@@ -39,13 +39,11 @@ exports.updateMovie = async (req, res) => {
     }
 };
 
+// Usuwanie filmu
 exports.deleteMovie = async (req, res) => {
     try {
         const { id } = req.params;
-
-        // Usuwanie filmu
         const deletedMovie = await Movie.delete(id);
-
         if (deletedMovie) {
             res.json({ message: "Film usunięty pomyślnie" });
         } else {
@@ -56,18 +54,16 @@ exports.deleteMovie = async (req, res) => {
     }
 };
 
-// Nowa metoda dodająca aktorów do filmu
+// Dodawanie aktorów do filmu
 exports.addActorsToMovie = async (req, res) => {
     try {
         const { id } = req.params;
-        const { actorIds } = req.body; // tablica id aktorów do dodania
-
+        const { actorIds } = req.body;
         const movie = await Movie.getById(id);
         if (!movie) {
             return res.status(404).send({ message: "Film nie znaleziony" });
         }
 
-        // Dodawanie aktorów do filmu
         for (let actorId of actorIds) {
             await Movie.addActor(id, actorId);
         }
@@ -78,11 +74,10 @@ exports.addActorsToMovie = async (req, res) => {
     }
 };
 
-// Nowa metoda usuwająca aktora z filmu
+// Usuwanie aktora z filmu
 exports.removeActorFromMovie = async (req, res) => {
     try {
         const { id, actorId } = req.params;
-
         const movie = await Movie.getById(id);
         if (!movie) {
             return res.status(404).send({ message: "Film nie znaleziony" });
