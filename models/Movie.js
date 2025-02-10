@@ -1,4 +1,4 @@
-const pool = require('../db');
+const pool = require('../config/db');
 
 class Movie {
     static async getAll() {
@@ -31,6 +31,37 @@ class Movie {
         }
 
         return result.rows[0];
+    }
+
+    static async update(id, { title, year, image_url, description, actors }) {
+        const result = await pool.query(
+            `UPDATE movies SET title = $1, year = $2, image_url = $3, description = $4 WHERE id = $5 RETURNING *`,
+            [title, year, image_url, description, id]
+        );
+
+        if (result.rows.length === 0) {
+            return null; // Jeśli film o podanym ID nie istnieje
+        }
+
+        const updatedMovie = result.rows[0];
+
+        // Można dodać logikę aktualizacji aktorów, jeśli to konieczne
+        // np. usunięcie starych aktorów i dodanie nowych (w zależności od logiki aplikacji)
+
+        return updatedMovie;
+    }
+
+    static async delete(id) {
+        const result = await pool.query(
+            `DELETE FROM movies WHERE id = $1 RETURNING *`,
+            [id]
+        );
+
+        if (result.rows.length === 0) {
+            return null; // Jeśli film o podanym ID nie istnieje
+        }
+
+        return result.rows[0]; // Zwracamy usunięty film
     }
 }
 
