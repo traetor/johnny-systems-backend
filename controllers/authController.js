@@ -100,10 +100,10 @@ exports.login = async (req, res) => {
         return res.status(400).send({ message: 'Email, password, and reCAPTCHA token are required' });
     }
 
-    const isRecaptchaValid = await verifyRecaptcha(recaptchaToken);
-    if (!isRecaptchaValid) {
-        return res.status(400).send({ message: 'Invalid reCAPTCHA. Please try again.' });
-    }
+    // const isRecaptchaValid = await verifyRecaptcha(recaptchaToken);
+    // if (!isRecaptchaValid) {
+       // return res.status(400).send({ message: 'Invalid reCAPTCHA. Please try again.' });
+    // }
 
     User.findByEmail(email, (err, users) => {
         if (err) {

@@ -10,6 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const userRoutes = require('./routes/userRoutes');
 const noteRoutes = require('./routes/noteRoutes');
+const movieRoutes = require('./routes/movieRoutes'); // Nowa trasa filmów
 
 dotenv.config();
 
@@ -47,7 +48,7 @@ const swaggerOptions = {
             },
         ],
     },
-    apis: ['./routes/*.js'], // Upewnij się, że ścieżka jest poprawna
+    apis: ['./routes/*.js'],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
@@ -61,8 +62,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notes', noteRoutes);
+app.use('/api/movies', movieRoutes); // Nowa trasa filmów
 
-// Uruchamiaj serwer tylko, jeśli nie jesteś w trybie testowym
 if (process.env.NODE_ENV !== 'test') {
     const PORT = process.env.PORT || 3001;
     app.listen(PORT, () => {
@@ -70,4 +71,4 @@ if (process.env.NODE_ENV !== 'test') {
     });
 }
 
-module.exports = app; // Eksportuj aplikację dla testów
+module.exports = app;
