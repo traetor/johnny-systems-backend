@@ -1,3 +1,4 @@
+// app.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
@@ -10,7 +11,8 @@ const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const userRoutes = require('./routes/userRoutes');
 const noteRoutes = require('./routes/noteRoutes');
-const movieRoutes = require('./routes/movieRoutes'); // Nowa trasa filmów
+const movieRoutes = require('./routes/movieRoutes');
+const actorRoutes = require('./routes/actorRoutes'); // Nowa trasa aktorów
 
 dotenv.config();
 
@@ -31,7 +33,6 @@ const serverUrl = process.env.NODE_ENV === 'production'
     ? 'https://johnny-systems-backend.vercel.app'
     : `http://localhost:${process.env.PORT || 3001}`;
 
-// CDN CSS
 const CSS_URL = "https://johnny-systems.vercel.app/css/swagger-ui.min.css";
 
 const swaggerOptions = {
@@ -62,7 +63,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notes', noteRoutes);
-app.use('/api/movies', movieRoutes); // Nowa trasa filmów
+app.use('/api/movies', movieRoutes);
+app.use('/api/actors', actorRoutes); // Nowa trasa aktorów
 
 if (process.env.NODE_ENV !== 'test') {
     const PORT = process.env.PORT || 3001;

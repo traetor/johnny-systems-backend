@@ -162,4 +162,76 @@ router.put('/:id', authMiddleware, movieController.updateMovie);
  */
 router.delete('/:id', authMiddleware, movieController.deleteMovie);
 
+/**
+ * @swagger
+ * /api/movies/{id}/actors:
+ *   post:
+ *     summary: Add actors to a movie
+ *     tags: [Movies]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the movie
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               actorIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 example: [1, 2, 3]
+ *     responses:
+ *       200:
+ *         description: Actors added successfully
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Movie not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/:id/actors', authMiddleware, movieController.addActorsToMovie);
+
+/**
+ * @swagger
+ * /api/movies/{id}/actors/{actorId}:
+ *   delete:
+ *     summary: Remove an actor from a movie
+ *     tags: [Movies]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the movie
+ *       - in: path
+ *         name: actorId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the actor to remove
+ *     responses:
+ *       200:
+ *         description: Actor removed successfully
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Movie or actor not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.delete('/:id/actors/:actorId', authMiddleware, movieController.removeActorFromMovie);
+
 module.exports = router;
