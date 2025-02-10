@@ -1,14 +1,20 @@
 class Actor {
     static async getAll() {
-        const result = await pool.query(`
+        try {
+            const result = await pool.query(`
             SELECT actors.*, 
-                COUNT(movie_actors.movie_id) AS movieCount
+                   COALESCE(COUNT(movie_actors.movie_id), 0) AS movieCount
             FROM actors
             LEFT JOIN movie_actors ON actors.id = movie_actors.actor_id
             GROUP BY actors.id
             ORDER BY actors.name ASC
         `);
-        return result.rows;
+            console.log("Dane zwrócone przez bazę:", result.rows);
+            return result.rows;
+        } catch (err) {
+            console.error("Błąd SQL:", err);
+            throw err;
+        }
     }
 
     static async create(name) {
