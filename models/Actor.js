@@ -1,9 +1,13 @@
-// models/Actor.js
-const pool = require('../config/db');
-
 class Actor {
     static async getAll() {
-        const result = await pool.query('SELECT * FROM actors ORDER BY name ASC');
+        const result = await pool.query(`
+            SELECT actors.*, 
+                COUNT(movie_actors.movie_id) AS movieCount
+            FROM actors
+            LEFT JOIN movie_actors ON actors.id = movie_actors.actor_id
+            GROUP BY actors.id
+            ORDER BY actors.name ASC
+        `);
         return result.rows;
     }
 
